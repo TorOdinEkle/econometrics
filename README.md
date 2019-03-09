@@ -1,2 +1,2 @@
 # econometrics
-Simple econometrics project to learn R
+Mandatory spring -19
