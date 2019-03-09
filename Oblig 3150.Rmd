@@ -1,0 +1,124 @@
+---
+title: "Oblig ECON 3150"
+author: "Tor Odin Ekle"
+date: "2 februar 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse);library(MASS);library(ISLR);library(tinytex); library(haven)
+```
+
+## Lønnsgapet
+
+```{r cars, warning=FALSE, fig.pos= 'H', echo=FALSE}
+seminar_econometric <- read_dta(file = "seminar_econometric.dta")
+seminar_econometric$femalef <- as.factor(seminar_econometric$female)
+wagemale <- seminar_econometric$wage4[seminar_econometric$female == 0]
+wagefemale <- seminar_econometric$wage4[seminar_econometric$female == 1]
+wagefemale <- wagefemale[!is.na(wagefemale)]
+wagemale <- wagemale[!is.na(wagemale)]
+
+## Lager et enkelt boxplott til å begynne med bare for å få en enkel oversikt over datasettet. 
+
+ggplot(data = seminar_econometric, aes(x = femalef, y = wage4)) +
+  geom_boxplot() +
+  xlab("Kjønn: Mann = 0, Kvinne = 1") +
+  ylab("Timelønn USD") +
+  theme_minimal() +
+  ylim(0,75)
+
+t.test(wagemale,wagefemale)
+
+```
+
+
+Har tatt ut uteliggere. Også de som er oppgitt med NA, men har valgt å beholde de som har 0 i timelønn. Dette kan være arbeidstrening, internship, eller andre som er i ulønnet arbeid. 
+
+## Oversikt
+```{r bar charts, echo=FALSE, warning= FALSE, fig.width=3, fig.height=3,fig.show='asis',fig.align='default'}
+
+ggplot(data = seminar_econometric, aes(x = wage4, fill =femalef)) +
+  geom_bar(binwidth = 5) +
+  xlim(0,100) +
+  xlab("Timelønn") +
+  ylab("Antall") +
+  theme_minimal()
+
+ggplot(data = seminar_econometric, aes(x = wage4, fill = femalef)) +
+  geom_bar(binwidth = 5, position = "fill") +
+  xlim(0,150) +
+  xlab("Timelønn") +
+  ylab("Fordeling i %") +
+  theme_minimal() 
+
+
+```
+
+## Arbeidstimer 
+
+```{R arbeidstimer, echo = FALSE, warning= FALSE}
+
+femalewrkh <- seminar_econometric %>%
+  filter(female == 1) %>%
+  pull(hourslw) %>%
+  na.omit
+
+maleworkh <- seminar_econometric %>%
+  filter(female == 0) %>%
+  pull(hourslw) %>%
+  na.omit
+
+t.test(maleworkh, femalewrkh)
+
+```
+
+## Barn
+
+
+```{r Barn, echo=FALSE, warning= FALSE}
+femalewage2kid <- seminar_econometric %>%
+  filter(ownchild >= 2) %>%
+  filter(female == 1) %>%
+  pull(wage4) %>%
+  na.omit()
+  
+malewage2kid <- seminar_econometric %>%
+  filter(ownchild >= 2) %>%
+  filter(female == 0) %>%
+  pull(wage4) %>%
+  na.omit()
+
+t.test(malewage2kid,femalewage2kid)
+
+```
+
+I denne t-testen har jeg kun tatt ut alle kvinner og alle menn. Ikke sett på andre ting som kan spille inn.
+Ut fra denne t-testen kan en si med 95% signifikans at lønnsforskjellen er i allefall 4.05 USD
+
+## Utdanningsnivå
+
+
+
+```{r Utdanning, echo=FALSE, warning= FALSE}
+ggplot(data = seminar_econometric, aes(x = femalef, y = wage4)) +
+  geom_boxplot() +
+  xlab("Kjønn; Mann = 0, Kvinne = 1") +
+  ylab("Timelønn USD") +
+  theme_minimal() +
+  ylim(0,75) +
+  facet_wrap(~ educ)
+```
+
+En kan si på generelt grunnlag at kvinner har samme medianlønn som menn som ligger et utdanningsnivå under de. Faktisk noe svakere også.  
+
+## Diskusjon
+
+Er det frivillig deltid? Undersøkelse fra Norge. 
+Kvinnen tar oftere byrden med barna? Ser dramatisk lønnstap for damer å få barn. Ikke like avgjørende for menn. 
+Kvinner er forventet med å gjøre mer hjemme? Ser de har signifikant kortere arbeidsuke. Dårlig betalt for utdanning samenlignet med menn. 
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
